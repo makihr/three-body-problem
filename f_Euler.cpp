@@ -74,7 +74,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
 }
 
 
-  void runge(int n, Particle& ptcl, int i, double dt, double r[][3],double v[][3]) {
+  void runge(int n, Particle& ptcl, int i, double dt, double r[][3], double v[][3]) {
     double k1_r[n][3], k1_v[n][3];
     double k2_r[n][3], k2_v[n][3];
     double k3_r[n][3], k3_v[n][3];
@@ -253,7 +253,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
     double t_out = dt_out;
     double ekin = 0, epot = 0;
 
-    interaction_calculation(n, ptcl, dt, r, v, a);
+    interaction_calculation(n, &ptcl, dt, r, v, a);
 
     double v_abs = sqrt(-a[0][0]);
     for (int i = 0; i < n; i++) {
@@ -270,7 +270,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
     t_out = dt_out;
 
     for (double t = 0; t < t_end; t += dt) {
-      interaction_calculation(n, ptcl, dt, r, v, a);
+      interaction_calculation(n, &ptcl, dt, r, v, a);
 
       for (int i = 0; i < n; i++) {
         for (int k = 0; k < 3; k++)
