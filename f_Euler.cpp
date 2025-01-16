@@ -1,8 +1,9 @@
 #include <cmath>
 #include <iostream>
 // #include <ps_types.hpp>
-#include "kepler.hpp"
+#include <iomanip>
 #include <particle_simulator.hpp>
+#include "kepler.hpp"
 
 using namespace std;
 
@@ -74,7 +75,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
 }
 
 
-  void runge(int n, Particle& ptcl, int i, double dt, double r[][3], double v[][3]) {
+  void runge(int n, Particle ptcl[], int i, double dt, double r[][3], double v[][3]) {
     double k1_r[n][3], k1_v[n][3];
     double k2_r[n][3], k2_v[n][3];
     double k3_r[n][3], k3_v[n][3];
@@ -151,7 +152,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
 
   }
 
-  void interaction_calculation(int n, Particle& ptcl, double dt, double r[][3], double v[][3], double a[][3]) {
+  void interaction_calculation(int n, Particle ptcl[], double dt, double r[][3], double v[][3], double a[][3]) {
     const double m = 1;
     for (int i = 0; i < n; i++)
       for (int k = 0; k < 3; k++)
@@ -241,13 +242,13 @@ double acceleration(int n, double r[][3], double a[][3]) {
     cerr << "and for the duration of the run" << endl;
     cin >> t_end;
 
-    const double pi = 2 * asin(1);
+    /*const double pi = 2 * asin(1);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
       r[i][0] = cos(phi);
       r[i][1] = sin(phi);
       r[i][2] = 0;
-    }
+    }*/
 
     double dt_out = 0.01;
     double t_out = dt_out;
@@ -255,13 +256,13 @@ double acceleration(int n, double r[][3], double a[][3]) {
 
     interaction_calculation(n, ptcl, dt, r, v, a);
 
-    double v_abs = sqrt(-a[0][0]);
+    /*double v_abs = sqrt(-a[0][0]);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
       v[i][0] = -v_abs * sin(phi);
       v[i][1] = v_abs * cos(phi);
       v[i][2] = 0;
-    }
+    }*/
 
     energy_calculation(n, r, v, ekin, epot);
     double e_in = ekin + epot;
