@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-// #include <ps_types.hpp>
+ #include <ps_types.hpp>
 #include <iomanip>
 #include <particle_simulator.hpp>
 #include "kepler.hpp"
@@ -75,14 +75,16 @@ double acceleration(int n, double r[][3], double a[][3]) {
 }
 
 
-  void runge(int n, Particle ptcl[], int i, double dt, double r[][3], double v[][3]) {
+  void runge(int n, Particle ptcl[],double dt, double r[][3], double v[][3]) {
     double k1_r[n][3], k1_v[n][3];
     double k2_r[n][3], k2_v[n][3];
     double k3_r[n][3], k3_v[n][3];
     double k4_r[n][3], k4_v[n][3];
     double a[n][3];
 
+printf("t0");
     acceleration(n, r, a);
+    printf("t1");
     for (int i = 0; i < n; i++) {
       for (int k = 0; k < 3; k++) {
         k1_r[i][k] = v[i][k];
@@ -90,7 +92,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
         k1_v[i][k] = a[i][k] / ptcl[i].mass;
       }
     }
-
+printf("t2");
     for (int i = 0; i < n; i++) {
       for (int k = 0; k < 3; k++) {
         r[i][k] += 0.5 * dt * k1_r[i][k];
@@ -98,7 +100,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
         v[i][k] += 0.5 * dt * k1_v[i][k];
       }
     }
-
+printf("t3");
     acceleration(n, r, a);
     for (int i = 0; i < n; i++) {
       for (int k = 0; k < 3; k++) {
@@ -149,7 +151,6 @@ double acceleration(int n, double r[][3], double a[][3]) {
            v[i][k] += (dt / 6) * (k1_v[i][k] + 2 * k2_v[i][k] + 2 * k3_v[i][k] + k4_v[i][k]);
 		}
     }
-
   }
 
   void interaction_calculation(int n, Particle ptcl[], double dt, double r[][3], double v[][3], double a[][3]) {
@@ -172,7 +173,7 @@ double acceleration(int n, double r[][3], double a[][3]) {
           a[j][k] -= m * rji[k] / r3;
         }
       }
-      runge(n, ptcl, i, dt, r, v);
+     // runge(n, ptcl, i, dt, r, v);
     }
   }
 
@@ -235,13 +236,15 @@ double acceleration(int n, double r[][3], double a[][3]) {
       v[i][2] = ptcl[i].vel.z;
     }
 
+
     const double m = 1;
     double dt, t_end;
+    printf("t1");
     cerr << "Please provide a value for the time step" << endl;
     cin >> dt;
     cerr << "and for the duration of the run" << endl;
     cin >> t_end;
-
+printf("t1");
     /*const double pi = 2 * asin(1);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
@@ -253,9 +256,9 @@ double acceleration(int n, double r[][3], double a[][3]) {
     double dt_out = 0.01;
     double t_out = dt_out;
     double ekin = 0, epot = 0;
-
-    interaction_calculation(n, ptcl, dt, r, v, a);
-
+printf("aaaaa");
+    //interaction_calculation(n, ptcl, dt, r, v, a);
+    acceleration(n,r,a);
     /*double v_abs = sqrt(-a[0][0]);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
@@ -271,8 +274,8 @@ double acceleration(int n, double r[][3], double a[][3]) {
     t_out = dt_out;
 
     for (double t = 0; t < t_end; t += dt) {
-      interaction_calculation(n, ptcl, dt, r, v, a);
-
+     // interaction_calculation(n, ptcl, dt, r, v, a);
+      runge(n, ptcl, dt, r, v);
       for (int i = 0; i < n; i++) {
         for (int k = 0; k < 3; k++)
           cout << r[i][k] << " ";
