@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
- #include <ps_types.hpp>
+#include <ps_types.hpp>
 #include <iomanip>
 #include <particle_simulator.hpp>
 #include "kepler.hpp"
@@ -8,17 +8,17 @@
 using namespace std;
 
 struct Particle {
-  PS::F64vec pos;
-  PS::F64vec vel;
-  PS::F64 mass;
+    PS::F64vec pos;
+    PS::F64vec vel;
+    PS::F64 mass;
 };
 struct OrbitalParam {
-  PS::F64 ax;
-  PS::F64 ecc;
-  PS::F64 inc;
-  PS::F64 OMG;
-  PS::F64 omg;
-  PS::F64 u;
+    PS::F64 ax;
+    PS::F64 ecc;
+    PS::F64 inc;
+    PS::F64 OMG;
+    PS::F64 omg;
+    PS::F64 u;
 };
 /*
 const double ax = 1.0;
@@ -51,157 +51,156 @@ a[][3])
         }
 }
 */
-double acceleration(int n, double r[][3], double a[][3]) {
-  const double m = 1;
-  for (int i = 0; i < n; i++)
-    for (int k = 0; k < 3; k++)
-      a[i][k] = 0;
+void acceleration(int n, double r[][3], double a[][3]) {
+    const double m = 1;
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < 3; k++)
+            a[i][k] = 0;
 
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      double rji[3];
-      for (int k = 0; k < 3; k++)
-        rji[k] = r[j][k] - r[i][k];
-      double r2 = 0;
-      for (int k = 0; k < 3; k++)
-        r2 += rji[k] * rji[k];
-      double r3 = r2 * sqrt(r2);
-      for (int k = 0; k < 3; k++) {
-        a[i][k] += m * rji[k] / r3;
-        a[j][k] -= m * rji[k] / r3;
-      }
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            double rji[3];
+            for (int k = 0; k < 3; k++)
+                rji[k] = r[j][k] - r[i][k];
+            double r2 = 0;
+            for (int k = 0; k < 3; k++)
+                r2 += rji[k] * rji[k];
+            double r3 = r2 * sqrt(r2);
+            for (int k = 0; k < 3; k++) {
+                a[i][k] += m * rji[k] / r3;
+                a[j][k] -= m * rji[k] / r3;
+            }
+        }
     }
-  }
 }
 
 
-  void runge(int n, Particle ptcl[],double dt, double r[][3], double v[][3]) {
+void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3]) {
     double k1_r[n][3], k1_v[n][3];
     double k2_r[n][3], k2_v[n][3];
     double k3_r[n][3], k3_v[n][3];
     double k4_r[n][3], k4_v[n][3];
     double a[n][3];
 
-printf("t0");
-    acceleration(n, r, a);
-    printf("t1");
-    for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        k1_r[i][k] = v[i][k];
-
-        k1_v[i][k] = a[i][k] / ptcl[i].mass;
-      }
-    }
-printf("t2");
-    for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        r[i][k] += 0.5 * dt * k1_r[i][k];
-
-        v[i][k] += 0.5 * dt * k1_v[i][k];
-      }
-    }
-printf("t3");
     acceleration(n, r, a);
     for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        k2_r[i][k] = v[i][k];
-
-        k2_v[i][k] = a[i][k] / ptcl[i].mass;
-      }
-    }
-
-    for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        r[i][k] += 0.5 * dt * k2_r[i][k];
-
-        v[i][k] += 0.5 * dt * k2_v[i][k];
-      }
-    }
-
-	acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        k3_r[i][k] = v[i][k];
-
-        k3_v[i][k] = a[i][k] / ptcl[i].mass;
-      }
-    }
-
-	for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        r[i][k] += dt * k3_r[i][k];
-
-        v[i][k] += dt * k3_v[i][k];
-      }
-    }
-
-	acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-      for (int k = 0; k < 3; k++) {
-        k4_r[i][k] = v[i][k];
-
-        k4_v[i][k] = a[i][k] / ptcl[i].mass;
-      }
-    }
-
-     for (int i = 0; i < n; i++) {
-		for(int k = 0; k < 3; k++){
-           r[i][k] += (dt / 6) * (k1_r[i][k] + 2 * k2_r[i][k] + 2 * k3_r[i][k] + k4_r[i][k]);
-
-           v[i][k] += (dt / 6) * (k1_v[i][k] + 2 * k2_v[i][k] + 2 * k3_v[i][k] + k4_v[i][k]);
-		}
-    }
-  }
-
-  void interaction_calculation(int n, Particle ptcl[], double dt, double r[][3], double v[][3], double a[][3]) {
-    const double m = 1;
-    for (int i = 0; i < n; i++)
-      for (int k = 0; k < 3; k++)
-        a[i][k] = 0;
-
-    for (int i = 0; i < n; i++) {
-      for (int j = i + 1; j < n; j++) {
-        double rji[3];
-        for (int k = 0; k < 3; k++)
-          rji[k] = r[j][k] - r[i][k];
-        double r2 = 0;
-        for (int k = 0; k < 3; k++)
-          r2 += rji[k] * rji[k];
-        double r3 = r2 * sqrt(r2);
         for (int k = 0; k < 3; k++) {
-          a[i][k] += m * rji[k] / r3;
-          a[j][k] -= m * rji[k] / r3;
-        }
-      }
-     // runge(n, ptcl, i, dt, r, v);
-    }
-  }
+            k1_r[i][k] = v[i][k];
 
-  void energy_calculation(int n, double r[][3], double v[][3], double &ekin, double &epot) {
+            k1_v[i][k] = a[i][k] / ptcl[i].mass;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            r[i][k] += 0.5 * dt * k1_r[i][k];
+
+            v[i][k] += 0.5 * dt * k1_v[i][k];
+        }
+    }
+
+    acceleration(n, r, a);
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            k2_r[i][k] = v[i][k];
+
+            k2_v[i][k] = a[i][k] / ptcl[i].mass;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            r[i][k] += 0.5 * dt * k2_r[i][k];
+
+            v[i][k] += 0.5 * dt * k2_v[i][k];
+        }
+    }
+
+    acceleration(n, r, a);
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            k3_r[i][k] = v[i][k];
+
+            k3_v[i][k] = a[i][k] / ptcl[i].mass;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            r[i][k] += dt * k3_r[i][k];
+
+            v[i][k] += dt * k3_v[i][k];
+        }
+    }
+
+    acceleration(n, r, a);
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            k4_r[i][k] = v[i][k];
+
+            k4_v[i][k] = a[i][k] / ptcl[i].mass;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < 3; k++) {
+            r[i][k] += (dt / 6) * (k1_r[i][k] + 2 * k2_r[i][k] + 2 * k3_r[i][k] + k4_r[i][k]);
+
+            v[i][k] += (dt / 6) * (k1_v[i][k] + 2 * k2_v[i][k] + 2 * k3_v[i][k] + k4_v[i][k]);
+        }
+    }
+
+}
+
+//void interaction_calculation(int n, double r[][3], double a[][3]) {
+//    const double m = 1;
+//    for (int i = 0; i < n; i++)
+//        for (int k = 0; k < 3; k++)
+//            a[i][k] = 0;
+//
+//    for (int i = 0; i < n; i++) {
+//        for (int j = i + 1; j < n; j++) {
+//            double rji[3];
+//            for (int k = 0; k < 3; k++)
+//                rji[k] = r[j][k] - r[i][k];
+//            double r2 = 0;
+//            for (int k = 0; k < 3; k++)
+//                r2 += rji[k] * rji[k];
+//            double r3 = r2 * sqrt(r2);
+//            for (int k = 0; k < 3; k++) {
+//                a[i][k] += m * rji[k] / r3;
+//                a[j][k] -= m * rji[k] / r3;
+//            }
+//        }
+//    }
+//}
+
+void energy_calculation(int n, double r[][3], double v[][3], double& ekin, double& epot) {
     const double m = 1;
     ekin = epot = 0.0;
     for (int i = 0; i < n; i++) {
-      for (int j = i + 1; j < n; j++) {
-        double rji[3];
+        for (int j = i + 1; j < n; j++) {
+            double rji[3];
+            for (int k = 0; k < 3; k++)
+                rji[k] = r[j][k] - r[i][k];
+            double r2 = 0;
+            for (int k = 0; k < 3; k++)
+                r2 += rji[k] * rji[k];
+            double r = sqrt(r2);
+            epot -= m * m / r;
+        }
         for (int k = 0; k < 3; k++)
-          rji[k] = r[j][k] - r[i][k];
-        double r2 = 0;
-        for (int k = 0; k < 3; k++)
-          r2 += rji[k] * rji[k];
-        double r = sqrt(r2);
-        epot -= m * m / r;
-      }
-      for (int k = 0; k < 3; k++)
-        ekin += 0.5 * m * v[i][k] * v[i][k];
+            ekin += 0.5 * m * v[i][k] * v[i][k];
     }
-  }
+}
 
-  int main() {
+
+int main() {
     int n = 3;
 
     Particle ptcl[n];
     for (int i = 0; i < n; i++) {
-      ptcl[i].mass = 1.0;
+        ptcl[i].mass = 1.0;
     }
     OrbitalParam orb[n - 1];
     orb[0].ax = 1.0;
@@ -217,34 +216,34 @@ printf("t3");
     orb[1].omg = 0.7;
     orb[1].u = 1.0;
     if (orb[0].ecc == 0.0)
-      orb[0].omg = 0.0;
+        orb[0].omg = 0.0;
     if (orb[1].ecc == 0.0)
-      orb[1].omg = 0.0;
+        orb[1].omg = 0.0;
     if (orb[0].inc == 0.0)
-      orb[0].OMG = 0.0;
+        orb[0].OMG = 0.0;
     if (orb[1].inc == 0.0)
-      orb[1].OMG = 0.0;
+        orb[1].OMG = 0.0;
     MakeHierarchicalSystem(ptcl, orb, n);
 
     double r[n][3], v[n][3], a[n][3];
     for (int i = 0; i < n; i++) {
-      r[i][0] = ptcl[i].pos.x;
-      r[i][1] = ptcl[i].pos.y;
-      r[i][2] = ptcl[i].pos.z;
-      v[i][0] = ptcl[i].vel.x;
-      v[i][1] = ptcl[i].vel.y;
-      v[i][2] = ptcl[i].vel.z;
+        r[i][0] = ptcl[i].pos.x;
+        r[i][1] = ptcl[i].pos.y;
+        r[i][2] = ptcl[i].pos.z;
+        v[i][0] = ptcl[i].vel.x;
+        v[i][1] = ptcl[i].vel.y;
+        v[i][2] = ptcl[i].vel.z;
     }
 
 
     const double m = 1;
     double dt, t_end;
-    printf("t1");
+
     cerr << "Please provide a value for the time step" << endl;
     cin >> dt;
     cerr << "and for the duration of the run" << endl;
     cin >> t_end;
-printf("t1");
+  
     /*const double pi = 2 * asin(1);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
@@ -256,9 +255,9 @@ printf("t1");
     double dt_out = 0.01;
     double t_out = dt_out;
     double ekin = 0, epot = 0;
-printf("aaaaa");
-    //interaction_calculation(n, ptcl, dt, r, v, a);
-    acceleration(n,r,a);
+    
+    //interaction_calculation(n, r, a);
+    acceleration(n, r, a);
     /*double v_abs = sqrt(-a[0][0]);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
@@ -274,16 +273,16 @@ printf("aaaaa");
     t_out = dt_out;
 
     for (double t = 0; t < t_end; t += dt) {
-     // interaction_calculation(n, ptcl, dt, r, v, a);
-      runge(n, ptcl, dt, r, v);
-      for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++)
-          cout << r[i][k] << " ";
-        for (int k = 0; k < 3; k++)
-          cout << v[i][k] << " ";
-      }
-      cout << endl;
-      t_out += dt_out;
+        // interaction_calculation(n, ptcl, dt, r, v, a);
+        runge(n, ptcl, dt, r, v);
+        for (int i = 0; i < n; i++) {
+            for (int k = 0; k < 3; k++)
+                cout << r[i][k] << " ";
+            for (int k = 0; k < 3; k++)
+                cout << v[i][k] << " ";
+        }
+        cout << endl;
+        t_out += dt_out;
     }
 
     energy_calculation(n, r, v, ekin, epot);
@@ -292,5 +291,5 @@ printf("aaaaa");
     cerr << "Final total energy E_out = " << e_out << endl;
     cerr << "absolute energy error: E_out- E_in = " << e_out - e_in << endl;
     cerr << "relative energy error: (E_out- E_in) / E_in = "
-         << (e_out - e_in) / e_in << endl;
-  }
+        << (e_out - e_in) / e_in << endl;
+}
