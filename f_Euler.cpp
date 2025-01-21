@@ -75,81 +75,97 @@ void acceleration(int n, double r[][3], double a[][3]) {
 }
 
 
-void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3]) {
+void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3])
+{
     double k1_r[n][3], k1_v[n][3];
     double k2_r[n][3], k2_v[n][3];
     double k3_r[n][3], k3_v[n][3];
     double k4_r[n][3], k4_v[n][3];
     double a[n][3];
-
-    acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
-            k1_r[i][k] = v[i][k];
-
-            k1_v[i][k] = a[i][k] / ptcl[i].mass;
-        }
-    }
-
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
-            r[i][k] += 0.5 * dt * k1_r[i][k];
-
-            v[i][k] += 0.5 * dt * k1_v[i][k];
+    double r0[n][3], v0[n][3];
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            r0[i][k] = r[i][k];
+            v0[i][k] = v[i][k];
         }
     }
 
     acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            k1_r[i][k] = v0[i][k];
+            k1_v[i][k] = a[i][k];
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            r[i][k] = r0[i][k] + 0.5 * dt * k1_r[i][k];
+            v[i][k] = v0[i][k] + 0.5 * dt * k1_v[i][k];
+        }
+    }
+    acceleration(n, r, a);
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
             k2_r[i][k] = v[i][k];
-
-            k2_v[i][k] = a[i][k] / ptcl[i].mass;
+            k2_v[i][k] = a[i][k];
         }
     }
 
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
-            r[i][k] += 0.5 * dt * k2_r[i][k];
-
-            v[i][k] += 0.5 * dt * k2_v[i][k];
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            r[i][k] = r0[i][k] + 0.5 * dt * k2_r[i][k];
+            v[i][k] = v0[i][k] + 0.5 * dt * k2_v[i][k];
         }
     }
 
     acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
             k3_r[i][k] = v[i][k];
-
-            k3_v[i][k] = a[i][k] / ptcl[i].mass;
+            k3_v[i][k] = a[i][k];
         }
     }
 
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
-            r[i][k] += dt * k3_r[i][k];
-
-            v[i][k] += dt * k3_v[i][k];
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            r[i][k] = r0[i][k] + dt * k3_r[i][k];
+            v[i][k] = v0[i][k] + dt * k3_v[i][k];
         }
     }
 
     acceleration(n, r, a);
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
             k4_r[i][k] = v[i][k];
-
-            k4_v[i][k] = a[i][k] / ptcl[i].mass;
+            k4_v[i][k] = a[i][k];
         }
     }
 
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < 3; k++) {
-            r[i][k] += (dt / 6) * (k1_r[i][k] + 2 * k2_r[i][k] + 2 * k3_r[i][k] + k4_r[i][k]);
-
-            v[i][k] += (dt / 6) * (k1_v[i][k] + 2 * k2_v[i][k] + 2 * k3_v[i][k] + k4_v[i][k]);
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            r[i][k] = r0[i][k] + (dt / 6) * (k1_r[i][k] + 2 * k2_r[i][k] + 2 * k3_r[i][k] + k4_r[i][k]);
+            v[i][k] = v0[i][k] + (dt / 6) * (k1_v[i][k] + 2 * k2_v[i][k] + 2 * k3_v[i][k] + k4_v[i][k]);
         }
     }
-
 }
 
 //void interaction_calculation(int n, double r[][3], double a[][3]) {
