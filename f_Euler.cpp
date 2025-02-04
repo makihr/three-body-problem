@@ -76,12 +76,13 @@ void acceleration(int n, double r[][3], double a[][3]) {
     }
 }
 
-double t1[3], t2[3], t3[3], t4[3], t5[3], t6[3], t7[3], t8[3], t9[3];
+double t1[3], t2[3], t3[3], t4[3], t5[3], t6[3], t7[3];
 double r12[3], v12[3],n12[3];
-double c = 100.0;
 
 void accelerationPNS(int n, double r[][3], double v[][3], double a[][3]) {
     const double m = 1;
+    double c = 100.0;
+
     for (int i = 0; i < n; i++)
         for (int k = 0; k < 3; k++)
             a[i][k] = 0;
@@ -94,24 +95,58 @@ void accelerationPNS(int n, double r[][3], double v[][3], double a[][3]) {
             double r2 = 0;
             for (int k = 0; k < 3; k++) {
                 r2 += rji[k] * rji[k];
-                r12[k] = abs(r[i][k] - r[j][k]);
-                n12[k] = -(rji[k]) / (r12[k]);
+            }
+            double r = sqrt(r2);
+            double r3 = r * r2;
+            for (int k = 0; k < 3; k++) {
+                n12[k] = -(rji[k]) / r;
                 v12[k] = v[i][k] - v[j][k];
-                t1[k] = (5 * m * m) / (r12[k] * r12[k] * r12[k]);
-                t2[k] = (4 * m * m) / (r12[k] * r12[k] * r12[k]);
-                t3[k] = m / (r12[k] * r12[k]);
-                t4[k] = (3 / 2) * n12[k] * n12[k] * v[j][k] * v[j][k];
+            }
+            double n12v2_2 = 0.0;
+            double v1_2 = 0.0;
+            double v1v2 = 0.0;
+            double v2_2 = 0.0;
+            double n12v1 = 0.0;
+            double n12v2 = 0.0;
+
+            for (int k = 0; k < 3; k++) {
+                n12v2_2 += n12[k] * v[j][k];
+                v1_2 += v[i][k] * v[i][k];
+                v1v2 += v[i][k] * v[j][k];
+                v2_2 += v[j][k] * v[j][k];
+                n12v1 = n12[k] * v[i][k];
+                n12v2 = n12[k] * v[j][k];
+            }
+
+            n12v2_2 *= n12v2_2;
+            for (int k = 0; k < 3; k++) {
+                a[i][k] += 1.0 / (c * c) * (((5 * m * m / r3 + 4 * m * m / r3 + m / r3 * (1.5 * n12v2_2 - v1_2 + 4.0 * v1v2 - 2.0 * v2_2)) * n12[k]) + m / r2 * (4 * n12v1 - 3 * n12v2) * v12[k]);
+                a[i][k] -= 1.0 / (c * c) * (((5 * m * m / r3 + 4 * m * m / r3 + m / r3 * (1.5 * n12v2_2 - v1_2 + 4.0 * v1v2 - 2.0 * v2_2)) * n12[k]) + m / r2 * (4 * n12v1 - 3 * n12v2) * v12[k]);
+            }
+            /*
+            for(int k=0; k<3; k++){
+                  //r12[k] = abs(r[i][k] - r[j][k]);
+                n12[k] = - (rji[k]) / r;
+                v12[k] = v[i][k] - v[j][k];
+                //t1[k] = (5.0 * m * m) / (r12[k] * r12[k] * r12[k]);
+                t1[k] = (5.0 * m * m) / r3 * n12[k];
+                //t2[k] = (4.0 * m * m) / (r12[k] * r12[k] * r12[k]);
+                t2[k] = (4.0 * m * m) / r3 * n12[k];
+                //t3[k] = m / (r12[k] * r12[k]);
+                t3[k] =  m / r2 *( (3.0/2.0)  )
+                t4[k] = (3.0 / 2.0) * n12[k] * n12[k] * v[j][k] * v[j][k];
                 t5[k] = m / (r12[k] * r12[k]);
-                t6[k] = 4 * n12[k] * v[i][k];
-                t7[k] = 3 * n12[k] * v[j][k];
+                t6[k] = 4.0 * n12[k] * v[i][k];
+                t7[k] = 3.0 * n12[k] * v[j][k];
 
             }
 
             double r3 = r2 * sqrt(r2);
             for (int k = 0; k < 3; k++) {
-                a[i][k] += m * rji[k] / r3+ ((((t1[k] + t2[k] + t3[k]) *(t4[k] -( v[i][k] * v[i][k]) + (4 * v[i][k] * v[j][k]) - (2 * v[j][k] * v[j][k]))) * n12[k]) + t5[k] * (t6[k] - t7[k]) * v12[k]) / c * c;
-                a[j][k] -= m * rji[k] / r3 + ((((t1[k] + t2[k] + t3[k]) *(t4[k] -( v[i][k] * v[i][k]) + (4 * v[i][k] * v[j][k]) - (2 * v[j][k] * v[j][k]))) * n12[k]) + t5[k] * (t6[k] - t7[k]) * v12[k]) / c * c;
+                a[i][k] += (m * rji[k] / r3) + (((t1[k] + t2[k] + t3[k]) * (t4[k] - (v[i][k] * v[i][k]) + 4 * v[i][k] * v[j][k] - (2 * v[j][k] * v[j][k]))) * n12[k] + t5[k] * (t6[k] - t7[k]) * v12[k]) / c * c;
+                a[j][k] -= (m * rji[k] / r3) + (((t1[k] + t2[k] + t3[k]) * (t4[k] - (v[i][k] * v[i][k]) + 4 * v[i][k] * v[j][k] - (2 * v[j][k] * v[j][k]))) * n12[k] + t5[k] * (t6[k] - t7[k]) * v12[k]) / c * c;
             }
+            */
         }
     }
 }
@@ -134,6 +169,7 @@ void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3])
         }
     }
 
+   // acceleration(n, r, a);
     accelerationPNS(n, r, v, a);
     for (int i = 0; i < n; i++)
     {
@@ -152,6 +188,7 @@ void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3])
             v[i][k] = v0[i][k] + 0.5 * dt * k1_v[i][k];
         }
     }
+    //acceleration(n, r, a);
     accelerationPNS(n, r, v, a);
     for (int i = 0; i < n; i++)
     {
@@ -171,6 +208,7 @@ void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3])
         }
     }
 
+    //acceleration(n, r, a);
     accelerationPNS(n, r, v, a);
     for (int i = 0; i < n; i++)
     {
@@ -190,6 +228,7 @@ void runge(int n, Particle ptcl[], double dt, double r[][3], double v[][3])
         }
     }
 
+    //acceleration(n, r, a);
     accelerationPNS(n, r, v, a);
     for (int i = 0; i < n; i++)
     {
@@ -301,7 +340,8 @@ int main() {
     cin >> dt;
     cerr << "and for the duration of the run" << endl;
     cin >> t_end;
-
+    //dt = 0.01;
+    //t_end = 150;
     /*const double pi = 2 * asin(1);
     for (int i = 0; i < n; i++) {
       double phi = i * 2 * pi / 3;
@@ -315,6 +355,7 @@ int main() {
     double ekin = 0, epot = 0;
 
     //interaction_calculation(n, r, a);
+    //acceleration(n, r, a);
     accelerationPNS(n, r, v, a);
     /*double v_abs = sqrt(-a[0][0]);
     for (int i = 0; i < n; i++) {
@@ -349,5 +390,5 @@ int main() {
     cerr << "Final total energy E_out = " << e_out << endl;
     cerr << "absolute energy error: E_out- E_in = " << e_out - e_in << endl;
     cerr << "relative energy error: (E_out- E_in) / E_in = "
-        << (e_out - e_in) / e_in << endl;
+         << (e_out - e_in) / e_in << endl;
 }
